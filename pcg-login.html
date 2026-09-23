@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PCG 相場チェッカー | ログイン</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;display:grid;place-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:#f4f6f8;color:#15171a;padding:20px;
+  }
+  .box{
+    width:min(100%,390px);background:#fff;border:1px solid #e2e6ea;
+    border-radius:18px;padding:30px 24px;box-shadow:0 12px 35px rgba(0,0,0,.08);
+  }
+  .brand{text-align:center;margin-bottom:25px}
+  .ball{font-size:36px}
+  h1{font-size:22px;margin:8px 0 6px}
+  p{font-size:14px;color:#697078;margin:0}
+  label{display:block;font-size:13px;font-weight:700;margin:22px 0 8px}
+  input{
+    width:100%;height:52px;border:1px solid #cfd5dc;border-radius:12px;
+    font-size:24px;text-align:center;letter-spacing:.45em;padding-left:.45em;
+    outline:none;
+  }
+  input:focus{border-color:#555;box-shadow:0 0 0 3px rgba(0,0,0,.07)}
+  button{
+    width:100%;height:50px;margin-top:14px;border:0;border-radius:12px;
+    background:#17191c;color:#fff;font-size:16px;font-weight:700;cursor:pointer;
+  }
+  #msg{height:20px;margin-top:12px;text-align:center;font-size:13px;color:#c62828}
+  .note{text-align:center;font-size:11px;color:#9298a0;margin-top:16px}
+</style>
+</head>
+<body>
+  <main class="box">
+    <div class="brand">
+      <div class="ball">◓</div>
+      <h1>PCG 相場チェッカー</h1>
+      <p>アクセスするには暗証番号を入力してください。</p>
+    </div>
+    <form id="login">
+      <label for="pin">暗証番号</label>
+      <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*"
+             maxlength="4" autocomplete="off" autofocus aria-label="暗証番号">
+      <button type="submit">アクセス</button>
+      <div id="msg" role="alert"></div>
+    </form>
+    <div class="note">PIN認証</div>
+  </main>
+<script>
+const expected = "0509";
+document.getElementById("login").addEventListener("submit", function(e){
+  e.preventDefault();
+  const pin = document.getElementById("pin");
+  const msg = document.getElementById("msg");
+  if(pin.value === expected){
+    msg.textContent = "";
+    window.location.href = "index.html";
+  }else{
+    msg.textContent = "暗証番号が違います。";
+    pin.value = "";
+    pin.focus();
+  }
+});
+</script>
+</body>
+</html>
