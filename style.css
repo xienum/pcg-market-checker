@@ -22,3 +22,17 @@
   #historyProduct{width:100%;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis}
   .product-grid{grid-template-columns:1fr}.product-item{min-height:0;padding:11px}.product-item b{font-size:12px}
 }
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (max-width:900px),(hover:none) and (pointer:coarse){
+  .top{height:58px;padding:0 12px;gap:8px}
+  .brand{min-width:0}.brand b{font-size:16px}.brand small,.top nav,.updated{display:none!important}
+  main{padding:14px 10px 76px;overflow-x:hidden}
+  .section-title{display:block}.section-title h1{font-size:24px;margin:0}.section-title span{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+  .cards{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:12px -10px 0;padding:0 10px 8px;scrollbar-width:none}
+  .cards::-webkit-scrollbar{display:none}.card{flex:0 0 88%;scroll-snap-align:center;padding:14px}.card h3{font-size:13px;min-height:0}
+  .toolbar{display:block}.segmented{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}.segmented button{padding:8px 2px;font-size:12px}
+  .toggles{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.toggle{flex:0 0 auto;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chartbox{height:260px}.rank-grid{grid-template-columns:1fr;gap:0}.rank-row{font-size:12px}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}table{min-width:620px;font-size:11px}
+  #historyProduct{width:100%;margin-bottom:8px}.product-grid{grid-template-columns:1fr}
+}
