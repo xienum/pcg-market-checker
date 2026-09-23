@@ -1,8 +1,8 @@
 name: Market price update
 on:
   schedule:
-    # Check frequently; scheduled runs can be delayed by GitHub.
-    - cron: '*/5 * * * *'
+    # Check every 30 minutes; scheduled runs can be delayed by GitHub.
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:
