@@ -2,7 +2,7 @@ name: Market price update
 on:
   schedule:
     # Check every hour at :07 to avoid peak scheduler congestion.
-    - cron: '7 * * * *'
+    - cron: '23 * * * *'
   workflow_dispatch:
 
 permissions:
