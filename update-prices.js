@@ -14,7 +14,8 @@ async function scrape(p){
   if(!m)throw Error('1個価格を検出できません');
   return {name,price:+m[1].replaceAll(',','')};
 }
-let success=0;
+const checkedAt=new Date().toISOString();
+let success=0; const failures=[];
 for(const p of d.products){
   try{
     const x=await scrape(p); p.name=x.name;
@@ -22,8 +23,9 @@ for(const p of d.products){
     const i=d.history.findIndex(h=>h.productId===p.id&&h.date===date);
     i>=0?d.history[i]=row:d.history.push(row);
     console.log(`${p.id}: ¥${x.price.toLocaleString('ja-JP')}`); success++;
-  }catch(e){ console.error(`${p.id}: ${e.message}`); }
+  }catch(e){ failures.push({productId:p.id,message:e.message}); console.error(`${p.id}: ${e.message}`); }
 }
+d.status={checkedAt,successCount:success,totalCount:d.products.length,ok:failures.length===0,failures};
 if(!success) process.exitCode=1;
 // Keep exactly one row per product/day. The newest scrape for today wins.
 const unique=new Map();
