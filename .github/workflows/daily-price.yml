@@ -26,9 +26,12 @@ jobs:
         run: npm install
 
       - name: Update prices
+        id: scrape
+        continue-on-error: true
         run: node update-prices.js
 
       - name: Save updated prices
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -49,4 +52,10 @@ jobs:
             sleep $((attempt * 3))
           done
           echo "Failed to save price data after 3 attempts"
+          exit 1
+
+      - name: Report scraper failure
+        if: steps.scrape.outcome == 'failure'
+        run: |
+          echo "One or more market prices could not be fetched. Status was saved to data.json."
           exit 1
