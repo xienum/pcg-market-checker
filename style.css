@@ -36,3 +36,4 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}table{min-width:620px;font-size:11px}
   #historyProduct{width:100%;margin-bottom:8px}.product-grid{grid-template-columns:1fr}
 }
+.product-image{display:block;width:100%;height:135px;object-fit:contain;margin:0 auto 12px;padding:8px;border-radius:10px;background:radial-gradient(circle,#17364d 0,#091b2a 72%);filter:drop-shadow(0 7px 9px #0006)}@media(max-width:900px),(hover:none) and (pointer:coarse){.product-image{height:150px;margin-bottom:10px}.card h3{white-space:normal!important;line-height:1.35}}
