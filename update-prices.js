@@ -25,4 +25,8 @@ for(const p of d.products){
   }catch(e){ console.error(`${p.id}: ${e.message}`); }
 }
 if(!success) process.exitCode=1;
+// Keep exactly one row per product/day. The newest scrape for today wins.
+const unique=new Map();
+for(const h of d.history) unique.set(`${h.productId}|${h.date}`,h);
+d.history=[...unique.values()].sort((a,b)=>a.date.localeCompare(b.date)||String(a.productId).localeCompare(String(b.productId)));
 fs.writeFileSync(FILE,JSON.stringify(d,null,2)+'\n');
