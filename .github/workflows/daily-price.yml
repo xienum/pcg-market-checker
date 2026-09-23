@@ -38,4 +38,7 @@ jobs:
             exit 0
           fi
           git commit -m "Update market prices $(TZ=Asia/Tokyo date +%F)"
-          git push
+          # The repository may have changed while prices were being scraped.
+          # Rebase our data update onto the latest main before pushing.
+          git pull --rebase origin main
+          git push origin main
