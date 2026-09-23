@@ -1,12 +1,16 @@
-name: Daily price update
+name: Market price update
 on:
   schedule:
-    # GitHub Actions uses UTC. 02:00 UTC = 11:00 JST.
-    - cron: '0 2 * * *'
+    # Check frequently; scheduled runs can be delayed by GitHub.
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: market-price-update
+  cancel-in-progress: false
 
 jobs:
   update:
