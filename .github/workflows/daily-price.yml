@@ -1,8 +1,8 @@
 name: Market price update
 on:
   schedule:
-    # Check every 30 minutes at :07/:37 JST-equivalent minute positions to avoid peak scheduler congestion.
-    - cron: '7,37 * * * *'
+    # Check every hour at :07 to avoid peak scheduler congestion.
+    - cron: '7 * * * *'
   workflow_dispatch:
 
 permissions:
