@@ -38,7 +38,15 @@ jobs:
             exit 0
           fi
           git commit -m "Update market prices $(TZ=Asia/Tokyo date +%F)"
-          # The repository may have changed while prices were being scraped.
-          # Rebase our data update onto the latest main before pushing.
-          git pull --rebase origin main
-          git push origin main
+          # Retry safely if main changes while this job is running.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "Push attempt $attempt failed; retrying..."
+            sleep $((attempt * 3))
+          done
+          echo "Failed to save price data after 3 attempts"
+          exit 1
