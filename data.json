@@ -2,7 +2,7 @@
   "products": [
     {
       "id": "881421",
-      "name": "ポケモンカードゲームMEGA 拡張パック「30th CELEBRATION」Box",
+      "name": "Pokemon Card Game MEGA Expansion Pack \"30th CELEBRATION\" Box",
       "url": "https://snkrdunk.com/apparels/881421"
     },
     {
@@ -140,17 +140,24 @@
     {
       "productId": "881421",
       "date": "2026-09-23",
-      "price": 25999
+      "price": 25500
     },
     {
       "productId": "881423",
       "date": "2026-09-23",
-      "price": 18000
+      "price": 18249
     },
     {
       "productId": "881424",
       "date": "2026-09-23",
-      "price": 72900
+      "price": 71900
     }
-  ]
+  ],
+  "status": {
+    "checkedAt": "2026-09-23T05:08:51.993Z",
+    "successCount": 3,
+    "totalCount": 3,
+    "ok": true,
+    "failures": []
+  }
 }
