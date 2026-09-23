@@ -1,0 +1,6 @@
+name = "pcg-market-scheduler"
+main = "src/index.js"
+compatibility_date = "2026-09-24"
+
+[triggers]
+crons = ["37 * * * *"]
