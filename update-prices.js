@@ -26,7 +26,7 @@ for(const p of d.products){
   }catch(e){ failures.push({productId:p.id,message:e.message}); console.error(`${p.id}: ${e.message}`); }
 }
 d.status={checkedAt,successCount:success,totalCount:d.products.length,ok:failures.length===0,failures};
-if(!success) process.exitCode=1;
+if(failures.length) process.exitCode=1;
 // Keep exactly one row per product/day. The newest scrape for today wins.
 const unique=new Map();
 for(const h of d.history) unique.set(`${h.productId}|${h.date}`,h);
