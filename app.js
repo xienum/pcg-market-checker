@@ -3,7 +3,7 @@ async function load(){const r=await fetch('./data.json?ts='+Date.now());data=awa
 function hist(id){return data.history.filter(x=>x.productId===id).sort((a,b)=>a.date.localeCompare(b.date))}
 function stat(p){const h=hist(p.id),latest=h.at(-1),prev=h.at(-2),delta=prev?latest.price-prev.price:null,pct=prev&&prev.price?delta/prev.price*100:null,max=h.length?Math.max(...h.map(x=>x.price)):null,min=h.length?Math.min(...h.map(x=>x.price)):null,maxRow=h.find(x=>x.price===max),minRow=h.find(x=>x.price===min);return{h,latest,prev,delta,pct,max,min,maxRow,minRow}}
 function changeHTML(s){if(s.delta==null)return '<span class="neutral">前日比 —</span>';const cls=s.delta>0?'positive':s.delta<0?'negative':'neutral',sign=s.delta>0?'+':s.delta<0?'-':'';return `<span class="${cls}">${sign}${yen(s.delta)} (${s.pct>0?'+':''}${s.pct.toFixed(2)}%)</span>`}
-function render(){const dates=data.history.map(x=>x.date).sort(),last=dates.at(-1);$('#todayDate').textContent=last||'';$('#updated').textContent='最終更新 '+(last||'—')+' 11:00';$('#cards').innerHTML=data.products.map(p=>{const s=stat(p);return `<article class="card"><h3>${esc(shortName(p.name))}</h3><div class="price">${yen(s.latest?.price)}</div><div class="change">${changeHTML(s)}</div><div class="extremes"><span>最高値<b>${yen(s.max)}</b><small>${s.maxRow?.date||''}</small></span><span>最安値<b>${yen(s.min)}</b><small>${s.minRow?.date||''}</small></span></div><a class="source" href="${esc(p.url)}" target="_blank" rel="noopener">スニダン商品ページ →</a></article>`}).join('');$('#toggles').innerHTML=data.products.map((p,i)=>`<button class="toggle" data-id="${p.id}"><span class="dot" style="background:${['#31e69a','#19a7ff','#ff5263','#ffc857'][i%4]}"></span>${esc(shortName(p.name))}</button>`).join('');$$('.toggle').forEach(b=>b.onclick=()=>{b.classList.toggle('off');draw()});rank();products();historySelect();draw()}
+function render(){const dates=data.history.map(x=>x.date).sort(),last=dates.at(-1);$('#todayDate').textContent=last||'';$('#updated').textContent='最終更新 '+(last||'—')+' 11:00';$('#cards').innerHTML=data.products.map(p=>{const s=stat(p);return `<article class="card" data-product-id="${p.id}" tabindex="0"><h3>${esc(shortName(p.name))}</h3><div class="price">${yen(s.latest?.price)}</div><div class="change">${changeHTML(s)}</div><div class="extremes"><span>最高値<b>${yen(s.max)}</b><small>${s.maxRow?.date||''}</small></span><span>最安値<b>${yen(s.min)}</b><small>${s.minRow?.date||''}</small></span></div><a class="source" href="${esc(p.url)}" target="_blank" rel="noopener">スニダン商品ページ →</a></article>`}).join('');$('#toggles').innerHTML=data.products.map((p,i)=>`<button class="toggle" data-id="${p.id}"><span class="dot" style="background:${['#31e69a','#19a7ff','#ff5263','#ffc857'][i%4]}"></span>${esc(shortName(p.name))}</button>`).join('');$$('.toggle').forEach(b=>b.onclick=()=>{b.classList.toggle('off');draw()});rank();products();historySelect();draw()}
 function rank(){const rows=data.products.map(p=>({p,s:stat(p)})).filter(x=>x.s.delta!=null);const make=(arr,positive)=>arr.map((x,i)=>`<div class="rank-row"><span class="rank-num">${i+1}</span><b>${esc(shortName(x.p.name))}</b><span class="rank-value ${positive?'positive':'negative'}">${positive?'+':'-'}${yen(x.s.delta)}</span></div>`).join('')||'<p class="neutral">データ蓄積後に表示されます</p>';$('#upRank').innerHTML=make(rows.filter(x=>x.s.delta>0).sort((a,b)=>b.s.delta-a.s.delta).slice(0,3),true);$('#downRank').innerHTML=make(rows.filter(x=>x.s.delta<0).sort((a,b)=>a.s.delta-b.s.delta).slice(0,3),false)}
 function products(){$('#productCount').textContent='全'+data.products.length+'種類';$('#products').innerHTML=data.products.map(p=>`<a class="product-item source" href="${esc(p.url)}" target="_blank" rel="noopener"><b>${esc(shortName(p.name))}</b><small>${yen(stat(p).latest?.price)}</small></a>`).join('')}
 function historySelect(){const sel=$('#historyProduct'),v=sel.value;sel.innerHTML=data.products.map(p=>`<option value="${p.id}">${esc(shortName(p.name))}</option>`).join('');if(v&&data.products.some(p=>p.id===v))sel.value=v;sel.onchange=historyTable;historyTable()}
@@ -28,4 +28,26 @@ $$('#ranges button').forEach(b=>b.onclick=()=>{$$('#ranges button').forEach(x=>x
     addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
   };
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',setup):setup();
+})();
+
+// iPhone: tap a market card to open its chart and price history
+let mobileDetailChart;
+(function(){
+ const isPhone=()=>matchMedia('(max-width:600px)').matches;
+ const modal=()=>document.getElementById('mobileProductDetail');
+ function openDetail(id){
+  if(!isPhone()||!data)return;
+  const p=data.products.find(x=>x.id===id); if(!p)return;
+  const s=stat(p), h=s.h;
+  document.getElementById('mobileDetailName').textContent=shortName(p.name);
+  document.getElementById('mobileDetailPrice').textContent=yen(s.latest?.price);
+  document.getElementById('mobileDetailChange').innerHTML=changeHTML(s);
+  document.getElementById('mobileDetailHistory').innerHTML=[...h].reverse().map((x,i,arr)=>{const original=h.findIndex(z=>z.date===x.date),prev=original>0?h[original-1]:null,d=prev?x.price-prev.price:null,cls=d>0?'positive':d<0?'negative':'neutral',sign=d>0?'+':d<0?'-':'';return '<div class="mobile-history-row"><span>'+x.date+'</span><b>'+yen(x.price)+'</b><span class="'+cls+'">'+(d==null?'—':sign+yen(d))+'</span></div>'}).join('')||'<p class="neutral">履歴はまだありません</p>';
+  mobileDetailChart?.destroy();
+  mobileDetailChart=new Chart(document.getElementById('mobileDetailChart'),{type:'line',data:{labels:h.map(x=>x.date),datasets:[{data:h.map(x=>x.price),borderColor:'#19a7ff',backgroundColor:'#19a7ff',tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#173247'},ticks:{color:'#9db2c1',maxTicksLimit:5}},y:{grid:{color:'#173247'},ticks:{color:'#9db2c1',callback:v=>Number(v).toLocaleString()}}}}});
+  modal().classList.add('open'); modal().setAttribute('aria-hidden','false'); document.body.classList.add('detail-open');
+ }
+ function close(){modal()?.classList.remove('open');modal()?.setAttribute('aria-hidden','true');document.body.classList.remove('detail-open')}
+ document.addEventListener('click',e=>{const card=e.target.closest('#today .card[data-product-id]');if(card&&!e.target.closest('a'))openDetail(card.dataset.productId);if(e.target.id==='mobileDetailClose'||e.target===modal())close()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')close();if((e.key==='Enter'||e.key===' ')&&e.target.matches('#today .card[data-product-id]')){e.preventDefault();openDetail(e.target.dataset.productId)}});
 })();
