@@ -57,3 +57,16 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .table-wrap{margin:0!important;padding:0!important;overflow-x:visible!important}table{min-width:0!important;font-size:12px!important}th,td{padding:9px 5px!important}th:nth-child(5),td:nth-child(5),th:nth-child(6),td:nth-child(6){display:none}th:nth-child(4),td:nth-child(4){display:none}
   .product-grid{grid-template-columns:1fr!important;gap:8px}.product-item{min-height:0!important;padding:12px!important;margin:0}.product-item b{font-size:13px!important;line-height:1.4}.product-item small{display:block;margin-top:5px;font-size:14px;color:#fff}
 }
+
+/* iPhone: Today market cards in two columns */
+@media(max-width:600px){
+  #today .cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:0!important;padding:0!important;overflow:visible!important}
+  #today .card{width:auto!important;min-width:0!important;padding:12px 10px!important;border-radius:12px!important}
+  #today .card h3{font-size:12px!important;line-height:1.35!important;margin-bottom:7px!important;overflow-wrap:anywhere!important}
+  #today .price{font-size:24px!important;letter-spacing:-.5px!important;white-space:nowrap!important}
+  #today .change{font-size:13px!important;line-height:1.35!important;min-height:35px!important}
+  #today .extremes{grid-template-columns:1fr!important;gap:4px!important;margin-top:8px!important;padding-top:8px!important}
+  #today .extremes span{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:5px!important;padding:5px 6px!important;font-size:10px!important}
+  #today .extremes b{font-size:11px!important;margin:0!important;white-space:nowrap!important}
+  #today .source{font-size:10px!important;margin-top:8px!important}
+}
