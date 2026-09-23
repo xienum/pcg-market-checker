@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: market-price-update
@@ -108,6 +110,22 @@ jobs:
             -F "payload_json=$PAYLOAD" \
             -F "files[0]=@market-update.log;type=text/plain" \
             "$DISCORD_WEBHOOK_URL"
+
+
+      - name: Configure Pages
+        if: always() && steps.scrape.outcome == 'success'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages site
+        if: always() && steps.scrape.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy updated site to GitHub Pages
+        if: always() && steps.scrape.outcome == 'success'
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Report scraper failure
         if: steps.scrape.outcome == 'failure'
