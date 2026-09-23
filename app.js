@@ -10,3 +10,22 @@ function historySelect(){const sel=$('#historyProduct'),v=sel.value;sel.innerHTM
 function historyTable(){const p=data.products.find(x=>x.id===$('#historyProduct').value)||data.products[0],h=hist(p.id),max=h.length?Math.max(...h.map(x=>x.price)):null,min=h.length?Math.min(...h.map(x=>x.price)):null;$('#historyRows').innerHTML=[...h].sort((a,b)=>b.date.localeCompare(a.date)).map(x=>{const idx=h.findIndex(z=>z.date===x.date),prev=idx>0?h[idx-1]:null,d=prev?x.price-prev.price:null,pct=prev?d/prev.price*100:null,cls=d>0?'positive':d<0?'negative':'neutral',sign=d>0?'+':d<0?'-':'';return `<tr><td>${x.date}</td><td>${yen(x.price)}</td><td class="${cls}">${d==null?'—':sign+yen(d)}</td><td class="${cls}">${pct==null?'—':(pct>0?'+':'')+pct.toFixed(2)+'%'}</td><td>${yen(max)}</td><td>${yen(min)}</td></tr>`}).join('')}
 function draw(){const active=new Set($$('.toggle:not(.off)').map(x=>x.dataset.id)),all=[...new Set(data.history.map(x=>x.date))].sort();let labels=all;if(currentDays&&all.length){const end=new Date(all.at(-1)+'T00:00:00'),cut=new Date(end);cut.setDate(cut.getDate()-(currentDays-1));labels=all.filter(x=>new Date(x+'T00:00:00')>=cut)}const colors=['#31e69a','#19a7ff','#ff5263','#ffc857'];const sets=data.products.filter(p=>active.has(p.id)||!$('#toggles').children.length).map((p,i)=>({label:shortName(p.name),data:labels.map(dt=>data.history.find(x=>x.productId===p.id&&x.date===dt)?.price??null),borderColor:colors[data.products.indexOf(p)%colors.length],backgroundColor:colors[data.products.indexOf(p)%colors.length],tension:.3,spanGaps:true,pointRadius:3}));chart?.destroy();chart=new Chart($('#chart'),{type:'line',data:{labels,datasets:sets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{color:'#173247'},ticks:{color:'#9db2c1'}},y:{grid:{color:'#173247'},ticks:{color:'#9db2c1',callback:v=>Number(v).toLocaleString()}}}}})}
 $$('#ranges button').forEach(b=>b.onclick=()=>{$$('#ranges button').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentDays=+b.dataset.days;draw()});load().catch(e=>{$('#cards').innerHTML='<article class="card">データの読み込みに失敗しました。</article>'});
+// iPhone bottom tabs: highlight the section currently in view
+(function(){
+  const setup=()=>{
+    const tabs=[...document.querySelectorAll('.mobile-tabs a[data-tab]')];
+    if(!tabs.length)return;
+    const sections=tabs.map(t=>document.getElementById(t.dataset.tab)).filter(Boolean);
+    const setActive=id=>tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+    tabs.forEach(t=>t.addEventListener('click',()=>setActive(t.dataset.tab)));
+    const update=()=>{
+      if(!matchMedia('(max-width:600px)').matches)return;
+      const y=window.scrollY+window.innerHeight*.38;
+      let current=sections[0]?.id;
+      for(const s of sections)if(s.offsetTop<=y)current=s.id;
+      setActive(current);
+    };
+    addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
+  };
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',setup):setup();
+})();
