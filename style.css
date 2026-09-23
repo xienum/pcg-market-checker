@@ -82,3 +82,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .mobile-tabs .tab-icon{font-size:21px;line-height:22px;font-weight:800}
   #today,#chartPanel,#ranking,#productsPanel{scroll-margin-top:68px}
 }
+
+@media(max-width:600px){
+  .mobile-tabs a:first-child{color:#8fa8ba}
+  .mobile-tabs a.active{color:#19a7ff;background:rgba(25,167,255,.12);box-shadow:inset 0 0 0 1px rgba(25,167,255,.12)}
+  .mobile-tabs a.active .tab-icon{filter:drop-shadow(0 0 6px rgba(25,167,255,.55))}
+}
