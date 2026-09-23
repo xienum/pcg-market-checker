@@ -70,3 +70,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   #today .extremes b{font-size:11px!important;margin:0!important;white-space:nowrap!important}
   #today .source{font-size:10px!important;margin-top:8px!important}
 }
+
+/* iPhone-only fixed bottom navigation */
+.mobile-tabs{display:none}
+@media(max-width:600px){
+  main{padding-bottom:92px!important}
+  .mobile-tabs{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));z-index:50;min-height:62px;padding:5px 4px;background:rgba(9,27,42,.96);border:1px solid #24465f;border-radius:18px;box-shadow:0 10px 30px #0008;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .mobile-tabs a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;color:#8fa8ba;text-decoration:none;font-size:10px;font-weight:700;border-radius:13px;-webkit-tap-highlight-color:transparent}
+  .mobile-tabs a:active,.mobile-tabs a:focus{background:#0d3551;color:#19a7ff;outline:none}
+  .mobile-tabs a:first-child{color:#19a7ff}
+  .mobile-tabs .tab-icon{font-size:21px;line-height:22px;font-weight:800}
+  #today,#chartPanel,#ranking,#productsPanel{scroll-margin-top:68px}
+}
