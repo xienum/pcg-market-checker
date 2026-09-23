@@ -22,17 +22,36 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Start diagnostic log
+        run: |
+          {
+            echo "PCG Market Checker diagnostic log"
+            echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+            echo "JST: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')"
+            echo "Run: $GITHUB_RUN_ID / Attempt: $GITHUB_RUN_ATTEMPT"
+            echo "Commit: $GITHUB_SHA / Event: $GITHUB_EVENT_NAME"
+            echo "Node: $(node --version)"
+            echo "========================================"
+          } > market-update.log
+
       - name: Install dependencies
-        run: npm install
+        run: |
+          set -o pipefail
+          npm install 2>&1 | tee -a market-update.log
 
       - name: Update prices
         id: scrape
         continue-on-error: true
-        run: node update-prices.js
+        run: |
+          set -o pipefail
+          echo "=== Price scrape ===" | tee -a market-update.log
+          node update-prices.js 2>&1 | tee -a market-update.log
 
       - name: Save updated prices
         if: always()
         run: |
+          exec > >(tee -a market-update.log) 2>&1
+          echo "=== Save data.json ==="
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data.json
@@ -53,6 +72,42 @@ jobs:
           done
           echo "Failed to save price data after 3 attempts"
           exit 1
+
+
+      - name: Add final diagnostics
+        if: always()
+        run: |
+          {
+            echo "========================================"
+            echo "Scraper outcome: ${{ steps.scrape.outcome }}"
+            echo "Finished UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+            echo "Finished JST: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')"
+          } >> market-update.log
+
+      - name: Upload diagnostic log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-update-log-${{ github.run_id }}-${{ github.run_attempt }}
+          path: market-update.log
+          retention-days: 30
+
+      - name: Send diagnostic log to Discord
+        if: always()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL is not configured; Discord notification skipped."
+            exit 0
+          fi
+          if [ "${{ steps.scrape.outcome }}" = "success" ]; then RESULT="SUCCESS"; else RESULT="ERROR"; fi
+          PAYLOAD=$(printf '{"content":"PCG Market Checker | %s | Run #%s (attempt %s)\\nDiagnostic log attached."}' "$RESULT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT")
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            -H "User-Agent: PCG-Market-Checker/1.0" \
+            -F "payload_json=$PAYLOAD" \
+            -F "files[0]=@market-update.log;type=text/plain" \
+            "$DISCORD_WEBHOOK_URL"
 
       - name: Report scraper failure
         if: steps.scrape.outcome == 'failure'
