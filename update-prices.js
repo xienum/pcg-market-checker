@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import fs from 'fs';
-const FILE = new URL('../data.json', import.meta.url);
+const FILE = new URL('./data.json', import.meta.url);
 const d = JSON.parse(fs.readFileSync(FILE, 'utf8'));
 const date = new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
 async function scrape(p){
