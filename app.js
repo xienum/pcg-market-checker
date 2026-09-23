@@ -1,57 +1,12 @@
-let chart;
-const $=s=>document.querySelector(s);
-const yen=n=>n==null?'取得待ち':'¥'+Number(n).toLocaleString('ja-JP');
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-async function load(){
-  try{
-    const r=await fetch('./data.json?ts='+Date.now());
-    if(!r.ok) throw new Error('data.json '+r.status);
-    render(await r.json());
-  }catch(e){
-    $('#cards').innerHTML='<div class="card">データの読み込みに失敗しました。<br><small>'+esc(e.message)+'</small></div>';
-  }
-}
-
-function stats(history){
-  if(!history.length)return {};
-  const sorted=[...history].sort((a,b)=>a.date.localeCompare(b.date));
-  const latest=sorted.at(-1), prev=sorted.at(-2);
-  const delta=prev?latest.price-prev.price:null;
-  const pct=prev&&prev.price?delta/prev.price*100:null;
-  return {latest,prev,delta,pct,min:Math.min(...sorted.map(x=>x.price)),max:Math.max(...sorted.map(x=>x.price))};
-}
-
-function render(d){
-  $('#cards').innerHTML=d.products.map(p=>{
-    const h=d.history.filter(x=>x.productId===p.id),s=stats(h);
-    const delta=s.delta==null?'前日比 —':`前日比 ${s.delta>=0?'+':''}${yen(s.delta)} (${s.pct>=0?'+':''}${s.pct.toFixed(1)}%)`;
-    return `<article class="card"><h3>${esc(p.name)}</h3><div class="price">${yen(s.latest?.price)}</div><div class="delta">${delta}</div><div class="stats">最高 ${yen(s.max)} ／ 最安 ${yen(s.min)}</div><a class="source" href="${esc(p.url)}" target="_blank" rel="noopener">スニダン商品ページ</a></article>`;
-  }).join('');
-
-  $('#products').innerHTML=d.products.map(p=>`<div class="product-row"><div><b>${esc(p.name)}</b><small>${esc(p.url)}</small></div></div>`).join('');
-  const dates=d.history.map(x=>x.date).sort();
-  $('#updated').textContent=dates.length?`最終価格データ: ${dates.at(-1)} / 毎日11:00 JST自動更新`:'価格データなし';
-  draw(d);
-}
-
-function draw(d){
-  const days=+$('#range').value;
-  const allDates=[...new Set(d.history.map(x=>x.date))].sort();
-  let labels=allDates;
-  if(days&&allDates.length){
-    const end=new Date(allDates.at(-1)+'T00:00:00');
-    const cutoff=new Date(end); cutoff.setDate(cutoff.getDate()-(days-1));
-    labels=allDates.filter(x=>new Date(x+'T00:00:00')>=cutoff);
-  }
-  const datasets=d.products.map(p=>({
-    label:p.name,
-    data:labels.map(dt=>d.history.find(x=>x.productId===p.id&&x.date===dt)?.price??null),
-    tension:.25,spanGaps:true
-  }));
-  chart?.destroy();
-  chart=new Chart($('#chart'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>'¥'+Number(v).toLocaleString('ja-JP')}}}}});
-}
-$('#range').onchange=load;
-$('#refresh').onclick=()=>load();
-load();
+let chart,data,currentDays=30;const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const yen=n=>n==null?'—':'¥'+Math.abs(Number(n)).toLocaleString('ja-JP');const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const shortName=n=>n.replace('ポケモンカードゲームMEGA 拡張パック「','').replace('」Box',' BOX').replace('Pokemon Card Game MEGA Constructed Deck "30th CELEBRATION Premium Deck Set Espeon,Umbreon"','プレミアムデッキセット エーフィ・ブラッキー').replace('Pokemon Card Game MEGA Special Box "30th CELEBRATION FUTURISTIC BOX"','FUTURISTIC BOX');
+async function load(){const r=await fetch('./data.json?ts='+Date.now());data=await r.json();render()}
+function hist(id){return data.history.filter(x=>x.productId===id).sort((a,b)=>a.date.localeCompare(b.date))}
+function stat(p){const h=hist(p.id),latest=h.at(-1),prev=h.at(-2),delta=prev?latest.price-prev.price:null,pct=prev&&prev.price?delta/prev.price*100:null,max=h.length?Math.max(...h.map(x=>x.price)):null,min=h.length?Math.min(...h.map(x=>x.price)):null,maxRow=h.find(x=>x.price===max),minRow=h.find(x=>x.price===min);return{h,latest,prev,delta,pct,max,min,maxRow,minRow}}
+function changeHTML(s){if(s.delta==null)return '<span class="neutral">前日比 —</span>';const cls=s.delta>0?'positive':s.delta<0?'negative':'neutral',sign=s.delta>0?'+':s.delta<0?'-':'';return `<span class="${cls}">${sign}${yen(s.delta)} (${s.pct>0?'+':''}${s.pct.toFixed(2)}%)</span>`}
+function render(){const dates=data.history.map(x=>x.date).sort(),last=dates.at(-1);$('#todayDate').textContent=last||'';$('#updated').textContent='最終更新 '+(last||'—')+' 11:00';$('#cards').innerHTML=data.products.map(p=>{const s=stat(p);return `<article class="card"><h3>${esc(shortName(p.name))}</h3><div class="price">${yen(s.latest?.price)}</div><div class="change">${changeHTML(s)}</div><div class="extremes"><span>最高値<b>${yen(s.max)}</b><small>${s.maxRow?.date||''}</small></span><span>最安値<b>${yen(s.min)}</b><small>${s.minRow?.date||''}</small></span></div><a class="source" href="${esc(p.url)}" target="_blank" rel="noopener">スニダン商品ページ →</a></article>`}).join('');$('#toggles').innerHTML=data.products.map((p,i)=>`<button class="toggle" data-id="${p.id}"><span class="dot" style="background:${['#31e69a','#19a7ff','#ff5263','#ffc857'][i%4]}"></span>${esc(shortName(p.name))}</button>`).join('');$$('.toggle').forEach(b=>b.onclick=()=>{b.classList.toggle('off');draw()});rank();products();historySelect();draw()}
+function rank(){const rows=data.products.map(p=>({p,s:stat(p)})).filter(x=>x.s.delta!=null);const make=(arr,positive)=>arr.map((x,i)=>`<div class="rank-row"><span class="rank-num">${i+1}</span><b>${esc(shortName(x.p.name))}</b><span class="rank-value ${positive?'positive':'negative'}">${positive?'+':'-'}${yen(x.s.delta)}</span></div>`).join('')||'<p class="neutral">データ蓄積後に表示されます</p>';$('#upRank').innerHTML=make(rows.filter(x=>x.s.delta>0).sort((a,b)=>b.s.delta-a.s.delta).slice(0,3),true);$('#downRank').innerHTML=make(rows.filter(x=>x.s.delta<0).sort((a,b)=>a.s.delta-b.s.delta).slice(0,3),false)}
+function products(){$('#productCount').textContent='全'+data.products.length+'種類';$('#products').innerHTML=data.products.map(p=>`<a class="product-item source" href="${esc(p.url)}" target="_blank" rel="noopener"><b>${esc(shortName(p.name))}</b><small>${yen(stat(p).latest?.price)}</small></a>`).join('')}
+function historySelect(){const sel=$('#historyProduct'),v=sel.value;sel.innerHTML=data.products.map(p=>`<option value="${p.id}">${esc(shortName(p.name))}</option>`).join('');if(v&&data.products.some(p=>p.id===v))sel.value=v;sel.onchange=historyTable;historyTable()}
+function historyTable(){const p=data.products.find(x=>x.id===$('#historyProduct').value)||data.products[0],h=hist(p.id),max=h.length?Math.max(...h.map(x=>x.price)):null,min=h.length?Math.min(...h.map(x=>x.price)):null;$('#historyRows').innerHTML=[...h].reverse().map((x,ri,rev)=>{const idx=h.findIndex(z=>z.date===x.date),prev=idx>0?h[idx-1]:null,d=prev?x.price-prev.price:null,pct=prev?d/prev.price*100:null,cls=d>0?'positive':d<0?'negative':'neutral',sign=d>0?'+':d<0?'-':'';return `<tr><td>${x.date}</td><td>${yen(x.price)}</td><td class="${cls}">${d==null?'—':sign+yen(d)}</td><td class="${cls}">${pct==null?'—':(pct>0?'+':'')+pct.toFixed(2)+'%'}</td><td>${yen(max)}</td><td>${yen(min)}</td></tr>`}).join('')}
+function draw(){const active=new Set($$('.toggle:not(.off)').map(x=>x.dataset.id)),all=[...new Set(data.history.map(x=>x.date))].sort();let labels=all;if(currentDays&&all.length){const end=new Date(all.at(-1)+'T00:00:00'),cut=new Date(end);cut.setDate(cut.getDate()-(currentDays-1));labels=all.filter(x=>new Date(x+'T00:00:00')>=cut)}const colors=['#31e69a','#19a7ff','#ff5263','#ffc857'];const sets=data.products.filter(p=>active.has(p.id)||!$('#toggles').children.length).map((p,i)=>({label:shortName(p.name),data:labels.map(dt=>data.history.find(x=>x.productId===p.id&&x.date===dt)?.price??null),borderColor:colors[data.products.indexOf(p)%colors.length],backgroundColor:colors[data.products.indexOf(p)%colors.length],tension:.3,spanGaps:true,pointRadius:3}));chart?.destroy();chart=new Chart($('#chart'),{type:'line',data:{labels,datasets:sets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{color:'#173247'},ticks:{color:'#9db2c1'}},y:{grid:{color:'#173247'},ticks:{color:'#9db2c1',callback:v=>Number(v).toLocaleString()}}}}})}
+$$('#ranges button').forEach(b=>b.onclick=()=>{$$('#ranges button').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentDays=+b.dataset.days;draw()});load().catch(e=>{$('#cards').innerHTML='<article class="card">データの読み込みに失敗しました。</article>'});
