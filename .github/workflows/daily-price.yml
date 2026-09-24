@@ -101,6 +101,80 @@ jobs:
           path: market-update.log
           retention-days: 30
 
+      - name: Configure Pages
+        id: configure_pages
+        if: always() && steps.scrape.outcome == 'success'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages site
+        id: upload_pages
+        if: always() && steps.scrape.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy updated site to GitHub Pages
+        if: always() && steps.scrape.outcome == 'success'
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Send result email
+        if: always()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: yuhisena@pngk.uk
+        run: |
+          if [ -z "$RESEND_API_KEY" ] || [ -z "$EMAIL_FROM" ]; then
+            echo "Email bot is installed but RESEND_API_KEY or EMAIL_FROM is not configured; email skipped."
+            exit 0
+          fi
+
+          RESULT="SUCCESS"
+          FAILED_STAGE=""
+          if [ "${{ steps.install.outcome }}" != "success" ]; then RESULT="ERROR"; FAILED_STAGE="Dependency installation"; fi
+          if [ "${{ steps.scrape.outcome }}" != "success" ]; then RESULT="ERROR"; FAILED_STAGE="Price scraping"; fi
+          if [ "${{ steps.save.outcome }}" != "success" ]; then RESULT="ERROR"; FAILED_STAGE="data.json save / GitHub push"; fi
+          if [ "${{ steps.configure_pages.outcome }}" = "failure" ]; then RESULT="ERROR"; FAILED_STAGE="GitHub Pages configuration"; fi
+          if [ "${{ steps.upload_pages.outcome }}" = "failure" ]; then RESULT="ERROR"; FAILED_STAGE="GitHub Pages upload"; fi
+          if [ "${{ steps.deployment.outcome }}" = "failure" ]; then RESULT="ERROR"; FAILED_STAGE="GitHub Pages deploy"; fi
+
+          PRODUCT_FAILURES=$(node -e '
+            const fs=require("fs");
+            try {
+              const d=JSON.parse(fs.readFileSync("data.json","utf8"));
+              const byId=new Map((d.products||[]).map(p=>[String(p.id),p.name]));
+              const f=d.status?.failures||[];
+              console.log(f.length ? f.map(x=>"- "+(byId.get(String(x.productId))||x.productId)+" ("+x.productId+"): "+x.message).join("\n") : "None");
+            } catch(e) { console.log("Could not read product failure details: "+e.message); }
+          ')
+
+          PRICES=$(node -e '
+            const fs=require("fs");
+            try {
+              const d=JSON.parse(fs.readFileSync("data.json","utf8"));
+              const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Tokyo"}).format(new Date());
+              const m=new Map((d.history||[]).filter(h=>h.date===today).map(h=>[String(h.productId),h.price]));
+              console.log((d.products||[]).map(p=>"- "+p.name+" ("+p.id+"): "+(m.has(String(p.id)) ? "¥"+Number(m.get(String(p.id))).toLocaleString("ja-JP") : "取得失敗")).join("\n"));
+            } catch(e) { console.log("Could not read prices: "+e.message); }
+          ')
+
+          BODY=$(printf 'PCG Market Checker | %s\nRun #%s (attempt %s)\nJST: %s\n\nPrices:\n%s\n\nFailed stage: %s\nProduct failures:\n%s\n\nFull diagnostic log:\n%s'             "$RESULT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')"             "$PRICES" "${FAILED_STAGE:-None}" "$PRODUCT_FAILURES" "$(cat market-update.log)")
+
+          PAYLOAD=$(node -e 'console.log(JSON.stringify({from:process.env.EMAIL_FROM,to:[process.env.EMAIL_TO],subject:process.env.SUBJECT,text:process.env.BODY}))'             EMAIL_FROM="$EMAIL_FROM" EMAIL_TO="$EMAIL_TO" SUBJECT="[PCG Market Checker] $RESULT - Run #$GITHUB_RUN_ID" BODY="$BODY")
+          # Rebuild payload with environment variables exported for Node.
+          export SUBJECT="[PCG Market Checker] $RESULT - Run #$GITHUB_RUN_ID"
+          export BODY
+          PAYLOAD=$(node -e 'console.log(JSON.stringify({from:process.env.EMAIL_FROM,to:[process.env.EMAIL_TO],subject:process.env.SUBJECT,text:process.env.BODY}))')
+
+          HTTP_CODE=$(curl -sS -o email-response.json -w "%{http_code}"             -X POST "https://api.resend.com/emails"             -H "Authorization: Bearer $RESEND_API_KEY"             -H "Content-Type: application/json"             -d "$PAYLOAD")
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::Email delivery failed with HTTP $HTTP_CODE"
+            cat email-response.json
+            exit 1
+          fi
+          echo "Email delivered to $EMAIL_TO (HTTP $HTTP_CODE)"
+
       - name: Send diagnostic log to Discord
         if: always()
         env:
@@ -118,30 +192,17 @@ jobs:
           if [ "${{ steps.configure_pages.outcome }}" = "failure" ]; then RESULT="ERROR"; STAGE="GitHub Pages configuration"; fi
           if [ "${{ steps.upload_pages.outcome }}" = "failure" ]; then RESULT="ERROR"; STAGE="GitHub Pages upload"; fi
           if [ "${{ steps.deployment.outcome }}" = "failure" ]; then RESULT="ERROR"; STAGE="GitHub Pages deploy"; fi
-          PAYLOAD=$(printf '{"content":"PCG Market Checker | %s | Run #%s (attempt %s)\\nSource: %s\\nStage: %s\\nDiagnostic log attached."}' "$RESULT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "${{ inputs.source }}" "$STAGE")
-          curl --fail-with-body --retry 3 --retry-all-errors \
-            -H "User-Agent: PCG-Market-Checker/1.0" \
-            -F "payload_json=$PAYLOAD" \
-            -F "files[0]=@market-update.log;type=text/plain" \
-            "$DISCORD_WEBHOOK_URL"
-
-
-      - name: Configure Pages
-        id: configure_pages
-        if: always() && steps.scrape.outcome == 'success'
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages site
-        id: upload_pages
-        if: always() && steps.scrape.outcome == 'success'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-
-      - name: Deploy updated site to GitHub Pages
-        if: always() && steps.scrape.outcome == 'success'
-        id: deployment
-        uses: actions/deploy-pages@v4
+          PRODUCT_FAILURES=$(node -e '
+            const fs=require("fs");
+            try {
+              const d=JSON.parse(fs.readFileSync("data.json","utf8"));
+              const byId=new Map((d.products||[]).map(p=>[String(p.id),p.name]));
+              const f=d.status?.failures||[];
+              console.log(f.length ? f.map(x=>(byId.get(String(x.productId))||x.productId)+" ("+x.productId+"): "+x.message).join("; ") : "None");
+            } catch(e) { console.log("Unavailable"); }
+          ')
+          PAYLOAD=$(node -e 'console.log(JSON.stringify({content:process.env.MSG}))'             MSG="PCG Market Checker | $RESULT | Run #$GITHUB_RUN_ID\nStage: $STAGE\nProduct failures: $PRODUCT_FAILURES\nDiagnostic log attached.")
+          curl --fail-with-body --retry 3 --retry-all-errors             -H "User-Agent: PCG-Market-Checker/1.0"             -F "payload_json=$PAYLOAD"             -F "files[0]=@market-update.log;type=text/plain"             "$DISCORD_WEBHOOK_URL"
 
       - name: Report scraper failure
         if: steps.scrape.outcome == 'failure'
