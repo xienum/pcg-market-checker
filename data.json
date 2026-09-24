@@ -2,17 +2,17 @@
   "products": [
     {
       "id": "846048",
-      "name": "ストームエメラルダ",
+      "name": "Pokemon Card Game MEGA Expansion Pack \"Storm Emeralda\" Box",
       "url": "https://snkrdunk.com/apparels/846048"
     },
     {
       "id": "806644",
-      "name": "アビスアイ",
+      "name": "Pokemon Card Game MEGA Expansion Pack \"Abyss Eye\" Box",
       "url": "https://snkrdunk.com/apparels/806644"
     },
     {
       "id": "762693",
-      "name": "ニンジャスピナー",
+      "name": "Pokemon Card Game MEGA Expansion Pack \"Ninja Spinner\" Box",
       "url": "https://snkrdunk.com/apparels/762693"
     },
     {
@@ -183,6 +183,21 @@
       "price": 63999
     },
     {
+      "productId": "762693",
+      "date": "2026-09-25",
+      "price": 8190
+    },
+    {
+      "productId": "806644",
+      "date": "2026-09-25",
+      "price": 8000
+    },
+    {
+      "productId": "846048",
+      "date": "2026-09-25",
+      "price": 11300
+    },
+    {
       "productId": "881421",
       "date": "2026-09-25",
       "price": 24000
@@ -195,13 +210,13 @@
     {
       "productId": "881424",
       "date": "2026-09-25",
-      "price": 63900
+      "price": 63999
     }
   ],
   "status": {
-    "checkedAt": "2026-09-24T19:39:16.132Z",
-    "successCount": 3,
-    "totalCount": 3,
+    "checkedAt": "2026-09-24T21:20:17.439Z",
+    "successCount": 6,
+    "totalCount": 6,
     "ok": true,
     "failures": []
   }
