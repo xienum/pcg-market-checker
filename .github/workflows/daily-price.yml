@@ -1,6 +1,11 @@
 name: Market price update
 on:
   workflow_dispatch:
+    inputs:
+      source:
+        description: 'Trigger source'
+        required: false
+        default: 'github-manual'
 
 permissions:
   contents: write
@@ -28,12 +33,13 @@ jobs:
             echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
             echo "JST: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')"
             echo "Run: $GITHUB_RUN_ID / Attempt: $GITHUB_RUN_ATTEMPT"
-            echo "Commit: $GITHUB_SHA / Event: $GITHUB_EVENT_NAME"
+            echo "Commit: $GITHUB_SHA / Event: $GITHUB_EVENT_NAME / Source: ${{ inputs.source }}"
             echo "Node: $(node --version)"
             echo "========================================"
           } > market-update.log
 
       - name: Install dependencies
+        id: install
         run: |
           set -o pipefail
           npm install 2>&1 | tee -a market-update.log
@@ -47,6 +53,7 @@ jobs:
           node update-prices.js 2>&1 | tee -a market-update.log
 
       - name: Save updated prices
+        id: save
         if: always()
         run: |
           exec > >(tee -a market-update.log) 2>&1
@@ -100,8 +107,15 @@ jobs:
             echo "DISCORD_WEBHOOK_URL is not configured; Discord notification skipped."
             exit 0
           fi
-          if [ "${{ steps.scrape.outcome }}" = "success" ]; then RESULT="SUCCESS"; else RESULT="ERROR"; fi
-          PAYLOAD=$(printf '{"content":"PCG Market Checker | %s | Run #%s (attempt %s)\\nDiagnostic log attached."}' "$RESULT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT")
+          RESULT="SUCCESS"
+          STAGE="All stages completed"
+          if [ "${{ steps.install.outcome }}" != "success" ]; then RESULT="ERROR"; STAGE="Dependency installation"; fi
+          if [ "${{ steps.scrape.outcome }}" != "success" ]; then RESULT="ERROR"; STAGE="Price scraping"; fi
+          if [ "${{ steps.save.outcome }}" != "success" ]; then RESULT="ERROR"; STAGE="data.json save / GitHub push"; fi
+          if [ "${{ steps.configure_pages.outcome }}" = "failure" ]; then RESULT="ERROR"; STAGE="GitHub Pages configuration"; fi
+          if [ "${{ steps.upload_pages.outcome }}" = "failure" ]; then RESULT="ERROR"; STAGE="GitHub Pages upload"; fi
+          if [ "${{ steps.deployment.outcome }}" = "failure" ]; then RESULT="ERROR"; STAGE="GitHub Pages deploy"; fi
+          PAYLOAD=$(printf '{"content":"PCG Market Checker | %s | Run #%s (attempt %s)\\nSource: %s\\nStage: %s\\nDiagnostic log attached."}' "$RESULT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "${{ inputs.source }}" "$STAGE")
           curl --fail-with-body --retry 3 --retry-all-errors \
             -H "User-Agent: PCG-Market-Checker/1.0" \
             -F "payload_json=$PAYLOAD" \
@@ -110,10 +124,12 @@ jobs:
 
 
       - name: Configure Pages
+        id: configure_pages
         if: always() && steps.scrape.outcome == 'success'
         uses: actions/configure-pages@v5
 
       - name: Upload Pages site
+        id: upload_pages
         if: always() && steps.scrape.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
