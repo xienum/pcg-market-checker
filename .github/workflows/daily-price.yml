@@ -1,5 +1,8 @@
 name: Market price update
 on:
+  schedule:
+    # Every hour at minute 0. GitHub Actions cron is UTC; minute 0 is also JST minute 0.
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       source:
