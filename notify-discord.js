@@ -70,7 +70,14 @@ async function main() {
   const webhook = process.env.DISCORD_WEBHOOK_URL;
   if (!webhook) throw new Error('DISCORD_WEBHOOK_URL is not configured');
   const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  const content = buildDiscordMessage(data);
+  let content = buildDiscordMessage(data);
+  if (fs.existsSync(LOG_FILE)) {
+    const rawLog = fs.readFileSync(LOG_FILE, 'utf8').trim();
+    if (rawLog) {
+      const room = Math.max(0, 1900 - content.length - 24);
+      if (room > 80) content += `\n\n【ログ本文】\n\`\`\`\n${rawLog.slice(-room)}\n\`\`\``;
+    }
+  }
   if (!content.trim()) throw new Error('Discord message body is empty');
 
   const form = new FormData();
