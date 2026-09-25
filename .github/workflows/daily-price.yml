@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/daily-price.yml'
       - 'update-prices.js'
+      - 'data.json'
       - 'notify-discord.js'
       - 'system-check.js'
       - 'package.json'
