@@ -30,7 +30,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
       - name: Start diagnostic log
         run: |
           echo "PCG Market Checker diagnostic log" > market-update.log
@@ -40,7 +39,7 @@ jobs:
         id: install
         run: |
           set -o pipefail
-          npm ci 2>&1 | tee -a market-update.log
+          npm install --no-audit --no-fund 2>&1 | tee -a market-update.log
       - name: Run 10-point system check
         id: selftest
         run: |
