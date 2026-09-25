@@ -210,11 +210,11 @@
     {
       "productId": "881424",
       "date": "2026-09-25",
-      "price": 63900
+      "price": 63500
     }
   ],
   "status": {
-    "checkedAt": "2026-09-25T00:49:29.855Z",
+    "checkedAt": "2026-09-25T01:03:00.681Z",
     "successCount": 6,
     "totalCount": 6,
     "ok": true,
