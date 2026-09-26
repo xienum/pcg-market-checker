@@ -52,3 +52,4 @@ let mobileDetailChart;
  document.addEventListener('click',e=>{const card=e.target.closest('#today .card[data-product-id]');if(card&&!e.target.closest('a'))openDetail(card.dataset.productId);if(e.target.id==='mobileDetailClose'||e.target===modal())close()});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();if((e.key==='Enter'||e.key===' ')&&e.target.matches('#today .card[data-product-id]')){e.preventDefault();openDetail(e.target.dataset.productId)}});
 })();
+
