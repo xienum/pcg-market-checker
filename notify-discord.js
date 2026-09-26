@@ -75,7 +75,7 @@ async function main() {
     const rawLog = fs.readFileSync(LOG_FILE, 'utf8').trim();
     if (rawLog) {
       const room = Math.max(0, 1900 - content.length - 24);
-      if (room > 80) content += `\n\n【ログ本文（タップで展開）】\n||\`\`\`\n${rawLog.slice(-room)}\n\`\`\`||`;
+      if (room > 80) content += `\n\n【ログ本文】\n\`\`\`\n${rawLog.slice(-room)}\n\`\`\``;
     }
   }
   if (!content.trim()) throw new Error('Discord message body is empty');
