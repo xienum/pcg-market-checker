@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PCG 管理コンソール - Preview</title><link rel="stylesheet" href="admin.css"></head>
+<body>
+<header><div class="brand"><span>◓</span><div><b>PCG 管理コンソール</b><small>商品管理 / UI PREVIEW</small></div></div><div class="preview">PREVIEW MODE ・ GitHub書き込み無効</div></header>
+<main>
+<section class="hero"><div><p class="eyebrow">ADMIN CONSOLE</p><h1>商品リスト管理</h1><p>単品・複数商品の登録フローを安全に確認するためのプレビューです。現在はGitHubへ書き込みません。</p></div><div class="status"><span class="dot"></span><div><b>プレビュー環境</b><small>書き込み機能 OFF</small></div></div></section>
+<nav class="tabs"><button class="active" data-view="add">＋ 商品追加</button><button data-view="products">商品管理</button><button data-view="system">システム状態</button></nav>
+<section id="add" class="view active">
+<div class="panel"><div class="panel-head"><div><h2>商品追加</h2><p>スニダンの商品URLを入力してください。</p></div><div class="mode"><button class="active" data-mode="single">1件登録</button><button data-mode="bulk">一括登録</button></div></div>
+<div class="notice">🔒 プレビュー中：確認ボタンを押してもGitHub・data.jsonは変更されません。</div>
+<label id="urlLabel">スニダンURL</label><textarea id="urls" rows="3" placeholder="https://snkrdunk.com/apparels/881421"></textarea>
+<div class="hint" id="hint">商品URLを1件入力してください。</div><button id="inspect" class="primary">商品情報を確認</button></div>
+<div id="result" class="panel hidden"><div class="panel-head"><div><h2>登録前確認</h2><p>登録対象を確認してください。</p></div><div id="summary" class="summary"></div></div><div id="rows" class="rows"></div><div class="actions"><button id="clear">キャンセル</button><button id="register" class="primary">プレビュー登録</button></div></div>
+</section>
+<section id="products" class="view"><div class="panel"><div class="panel-head"><div><h2>商品管理</h2><p>実装予定の管理操作プレビュー</p></div><span class="badge">READ ONLY</span></div>
+<div class="feature-grid"><article><b>✎ 商品編集</b><p>商品名・発売日・URLを変更</p></article><article><b>↕ 並び替え</b><p>発売日順・手動順に変更</p></article><article><b>↻ 価格再取得</b><p>選択商品または全商品を更新</p></article><article><b>⌫ 商品削除</b><p>確認画面を経由して削除</p></article></div></div></section>
+<section id="system" class="view"><div class="panel"><h2>システム状態</h2><div class="system-grid"><div><span>GitHub書き込み</span><b class="off">無効</b></div><div><span>管理API</span><b class="off">未接続</b></div><div><span>Cloudflare Worker</span><b class="off">未接続</b></div><div><span>UI Preview</span><b class="ok">正常</b></div></div></div></section>
+</main><div id="toast" class="toast"></div><script src="admin.js"></script></body></html>
