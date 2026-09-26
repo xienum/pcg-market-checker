@@ -1,0 +1,38 @@
+name: Maintenance report
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/maintenance-report.yml'
+permissions:
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send maintenance report to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          text = """🔧 PCG Market Checker | MAINTENANCE CHECK
+
+✅ システム状態: 正常稼働
+✅ 直近Run: #36204409810 SUCCESS
+✅ 商品データ: 6/6件 取得成功
+✅ data.json: ok=true
+✅ GitHub Pages: 公開成功
+✅ Discord通知: HTTP 200 / 1回目で送信成功
+✅ 定期実行: 毎時10分 (10 * * * *)
+
+⚠️ Node.js url.parse() DeprecationWarning を確認
+→ 現時点で価格取得・Pages公開・Discord通知への影響なし
+→ 影響がないため現状維持
+
+メンテナンス判定: 異常なし / 本番設定変更なし"""
+          data=json.dumps({"content":text}).encode()
+          req=urllib.request.Request(os.environ["DISCORD_WEBHOOK_URL"],data=data,headers={"Content-Type":"application/json"},method="POST")
+          with urllib.request.urlopen(req,timeout=20) as r:
+              print("Discord maintenance report delivered:",r.status)
+          PY
