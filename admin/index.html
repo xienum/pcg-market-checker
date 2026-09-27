@@ -15,5 +15,5 @@
 </section>
 <section id="products" class="view"><div class="panel"><div class="panel-head"><div><h2>商品管理</h2><p>実装予定の管理操作プレビュー</p></div><span class="badge">READ ONLY</span></div>
 <div class="feature-grid"><article><b>✎ 商品編集</b><p>商品名・発売日・URLを変更</p></article><article><b>↕ 並び替え</b><p>発売日順・手動順に変更</p></article><article><b>↻ 価格再取得</b><p>選択商品または全商品を更新</p></article><article><b>⌫ 商品削除</b><p>確認画面を経由して削除</p></article></div></div></section>
-<section id="system" class="view"><div class="panel"><h2>システム状態</h2><div class="system-grid"><div><span>GitHub書き込み</span><b class="off">無効</b></div><div><span>管理API</span><b class="off">未接続</b></div><div><span>Cloudflare Worker</span><b class="off">未接続</b></div><div><span>UI Preview</span><b class="ok">正常</b></div></div></div></section>
+<section id="system" class="view"><div class="panel"><h2>システム状態</h2><div class="system-grid"><div><span>GitHub書き込み</span><b class="off">無効</b></div><div><span>管理API</span><b id="apiStatus" class="off">確認中</b></div><div><span>Cloudflare Worker</span><b id="workerStatus" class="off">確認中</b></div><div><span>UI Preview</span><b class="ok">正常</b></div></div></div></section>
 </main><div id="toast" class="toast"></div><script src="admin.js"></script></body></html>
