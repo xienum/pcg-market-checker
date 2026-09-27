@@ -77,8 +77,8 @@ export default {
         if(!upstream.ok) throw new Error('Snkrdunk HTTP '+upstream.status);
         const html=await upstream.text();
         const patterns=[
-          /\\/apparels\\/(\\d+)/g,
-          /apparels%2F(\\d+)/g,
+          /[/]apparels[/](\\d+)/g,
+          /apparels%2F(\\d+)/gi,
           /apparel(?:Id|_id|_id\\\\")?[\\\\":=]+(\\d{4,})/gi
         ];
         const ids=[];
