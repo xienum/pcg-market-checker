@@ -40,21 +40,21 @@ export default {
         if(!upstream.ok) throw new Error('Snkrdunk HTTP '+upstream.status);
         const html=await upstream.text();
         const decode=s=>String(s||'').replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
-        const strip=s=>decode(String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '));
+        const strip=s=>decode(String(s||'').replace(/<script[\s\S]*?<\\/script>/gi,' ').replace(/<style[\s\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' '));
         const text=strip(html);
         let name=null;
-        const h1=html.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i);
+        const h1=html.match(/<h1[^>]*>([\s\S]*?)<\\/h1>/i);
         if(h1) name=strip(h1[1])||null;
         if(!name){
-          const title=html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);
-          if(title) name=strip(title[1]).replace(/通販[\\s\\S]*$/,'').trim()||null;
+          const title=html.match(/<title[^>]*>([\s\S]*?)<\\/title>/i);
+          if(title) name=strip(title[1]).replace(/通販[\s\S]*$/,'').trim()||null;
         }
         let price=null;
-        let pm=text.match(/1個\\([^)]*\\)\\s*¥\\s*([\\d,]+)\\s*~/);
-        if(!pm) pm=text.match(/購入手数料\\s*¥[\\d,]+\\s*¥\\s*([\\d,]+)\\s*~/);
+        let pm=text.match(/1個\\([^)]*\\)\s*¥\s*([\d,]+)\s*~/);
+        if(!pm) pm=text.match(/購入手数料\s*¥[\d,]+\s*¥\s*([\d,]+)\s*~/);
         if(pm) price=Number(pm[1].replace(/,/g,''));
         let releaseDate=null;
-        const dm=text.match(/発売日\\s*(20\\d{2})年(\\d{1,2})月(\\d{1,2})日/);
+        const dm=text.match(/発売日\s*(20\d{2})年(\d{1,2})月(\d{1,2})日/);
         if(dm) releaseDate=dm[1]+'-'+dm[2].padStart(2,'0')+'-'+dm[3].padStart(2,'0');
         return json({
           ok:true,
