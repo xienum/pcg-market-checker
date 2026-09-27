@@ -76,7 +76,13 @@ export default {
         }});
         if(!upstream.ok) throw new Error('Snkrdunk HTTP '+upstream.status);
         const html=await upstream.text();
-        const ids=[...html.matchAll(/(?:https?:\\/\\/snkrdunk\\.com)?\\/apparels\\/(\\d+)/g)].map(m=>m[1]);
+        const patterns=[
+          /\\/apparels\\/(\\d+)/g,
+          /apparels%2F(\\d+)/g,
+          /apparel(?:Id|_id|_id\\\\")?[\\\\":=]+(\\d{4,})/gi
+        ];
+        const ids=[];
+        for(const re of patterns){for(const m of html.matchAll(re)) ids.push(m[1]);}
         const unique=[...new Set(ids)];
         return json({
           ok:true,
@@ -85,7 +91,14 @@ export default {
           count:unique.length,
           products:unique.map(id=>({id,url:'https://snkrdunk.com/apparels/'+id})),
           complete:false,
-          note:'This endpoint returns product IDs present in the category HTML. Dynamic pagination discovery will be added next.'
+          diagnostics:{
+            upstreamStatus:upstream.status,
+            htmlBytes:new TextEncoder().encode(html).length,
+            apparelPathMatches:(html.match(/apparels/g)||[]).length,
+            detectedIds:unique.length,
+            looksLikeChallenge:/challenge|captcha|cf-chl|Just a moment/i.test(html)
+          },
+          note:unique.length?'カテゴリHTMLから商品IDを検出しました。':'カテゴリHTMLは取得できましたが商品IDを検出できません。動的API方式への切替が必要です。'
         });
       }catch(error){
         return json({ok:false,error:'カテゴリ情報の取得に失敗しました',detail:String(error?.message||error)},502);
