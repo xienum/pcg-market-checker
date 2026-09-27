@@ -67,6 +67,31 @@ export default {
       }
     }
 
+    if(url.pathname==='/api/category/26' && request.method==='GET'){
+      try{
+        const categoryUrl='https://snkrdunk.com/categories/26';
+        const upstream=await fetch(categoryUrl,{headers:{
+          'User-Agent':'Mozilla/5.0 (compatible; PCGMarketChecker/2.0)',
+          'Accept-Language':'ja-JP,ja;q=0.9,en;q=0.7'
+        }});
+        if(!upstream.ok) throw new Error('Snkrdunk HTTP '+upstream.status);
+        const html=await upstream.text();
+        const ids=[...html.matchAll(/(?:https?:\\/\\/snkrdunk\\.com)?\\/apparels\\/(\\d+)/g)].map(m=>m[1]);
+        const unique=[...new Set(ids)];
+        return json({
+          ok:true,
+          categoryId:'26',
+          categoryUrl,
+          count:unique.length,
+          products:unique.map(id=>({id,url:'https://snkrdunk.com/apparels/'+id})),
+          complete:false,
+          note:'This endpoint returns product IDs present in the category HTML. Dynamic pagination discovery will be added next.'
+        });
+      }catch(error){
+        return json({ok:false,error:'カテゴリ情報の取得に失敗しました',detail:String(error?.message||error)},502);
+      }
+    }
+
     return json({ok:false,error:'Not Found'},404);
   }
 };
