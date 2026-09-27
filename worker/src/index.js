@@ -69,24 +69,27 @@ export default {
 
     if(url.pathname==='/api/category/26' && request.method==='GET'){
       try{
-        const categoryUrl='https://snkrdunk.com/categories/26';
+        const page=Number(url.searchParams.get('page')||1);
+        if(!Number.isSafeInteger(page)||page<1||page>1000) return json({ok:false,error:'Invalid page'},400);
+        const categoryUrl='https://snkrdunk.com/search?searchCategoryIds=6%2F26&page='+page;
         const upstream=await fetch(categoryUrl,{headers:{
           'User-Agent':'Mozilla/5.0 (compatible; PCGMarketChecker/2.0)',
           'Accept-Language':'ja-JP,ja;q=0.9,en;q=0.7'
         }});
         if(!upstream.ok) throw new Error('Snkrdunk HTTP '+upstream.status);
         const html=await upstream.text();
-        const ids=[...html.matchAll(/(?:https?:\/\/snkrdunk\.com)?\/apparels\/(\d+)/g)].map(m=>m[1]);
+        const ids=[...html.matchAll(/<a\b[^>]*href=["'](?:https?:\/\/snkrdunk\.com)?\/apparels\/(\d+)[^"']*["'][^>]*>/gi)].map(m=>m[1]);
         const unique=[...new Set(ids)];
         if(!unique.length) throw new Error('No product IDs found in category HTML');
+        const nextPage=new RegExp('href=["\'][^"\']*search\\?[^"\']*page='+(page+1)+'(?:[&"\'])','i').test(html) ? page+1 : null;
         return json({
           ok:true,
           categoryId:'26',
           categoryUrl,
           count:unique.length,
           products:unique.map(id=>({id,url:'https://snkrdunk.com/apparels/'+id})),
-          complete:false,
-          note:'This endpoint returns product IDs present in the category HTML. Dynamic pagination discovery will be added next.'
+          page,nextPage,complete:nextPage===null,
+          note:'Product IDs from one search result page. Request nextPage until null.'
         });
       }catch(error){
         return json({ok:false,error:'カテゴリ情報の取得に失敗しました',detail:String(error?.message||error)},502);
