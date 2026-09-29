@@ -35,6 +35,12 @@
       "name": "ポケモンカードゲーム MEGA 拡張パック「ニンジャスピナー」BOX",
       "url": "https://snkrdunk.com/apparels/762693",
       "releaseDate": "2026-03-13"
+    },
+    {
+      "id": "687430",
+      "name": "ポケモンカードゲーム MEGA 拡張パック「インフェルノX」BOX",
+      "url": "https://snkrdunk.com/apparels/687430",
+      "releaseDate": "2025-09-26"
     }
   ],
   "history": [
@@ -307,6 +313,11 @@
       "productId": "881424",
       "date": "2026-09-28",
       "price": 61500
+    },
+    {
+      "productId": "687430",
+      "date": "2026-09-29",
+      "price": 17000
     },
     {
       "productId": "762693",
