@@ -702,41 +702,41 @@
     {
       "productId": "687430",
       "date": "2026-10-10",
-      "price": 17899
+      "price": 17200
     },
     {
       "productId": "762693",
       "date": "2026-10-10",
-      "price": 8899
+      "price": 8888
     },
     {
       "productId": "806644",
       "date": "2026-10-10",
-      "price": 8349
+      "price": 8200
     },
     {
       "productId": "846048",
       "date": "2026-10-10",
-      "price": 10400
+      "price": 10300
     },
     {
       "productId": "881421",
       "date": "2026-10-10",
-      "price": 25780
+      "price": 25700
     },
     {
       "productId": "881423",
       "date": "2026-10-10",
-      "price": 18000
+      "price": 17990
     },
     {
       "productId": "881424",
       "date": "2026-10-10",
-      "price": 63500
+      "price": 63000
     }
   ],
   "status": {
-    "checkedAt": "2026-10-10T06:59:49.267Z",
+    "checkedAt": "2026-10-10T13:35:32.033Z",
     "successCount": 7,
     "totalCount": 7,
     "ok": true,
