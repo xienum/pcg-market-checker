@@ -1191,10 +1191,39 @@
     }
   ],
   "status": {
-    "checkedAt": "2026-10-23T14:59:36.059Z",
-    "successCount": 7,
+    "checkedAt": "2026-10-23T19:08:11.300Z",
+    "successCount": 0,
     "totalCount": 7,
-    "ok": true,
-    "failures": []
+    "ok": false,
+    "failures": [
+      {
+        "productId": "881424",
+        "message": "HTTP 403"
+      },
+      {
+        "productId": "881423",
+        "message": "HTTP 403"
+      },
+      {
+        "productId": "881421",
+        "message": "HTTP 403"
+      },
+      {
+        "productId": "846048",
+        "message": "HTTP 403"
+      },
+      {
+        "productId": "806644",
+        "message": "HTTP 403"
+      },
+      {
+        "productId": "762693",
+        "message": "HTTP 403"
+      },
+      {
+        "productId": "687430",
+        "message": "HTTP 403"
+      }
+    ]
   }
 }
