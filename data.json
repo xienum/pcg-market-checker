@@ -1188,42 +1188,48 @@
       "productId": "881424",
       "date": "2026-10-23",
       "price": 63500
+    },
+    {
+      "productId": "687430",
+      "date": "2026-10-24",
+      "price": 18199
+    },
+    {
+      "productId": "762693",
+      "date": "2026-10-24",
+      "price": 9777
+    },
+    {
+      "productId": "806644",
+      "date": "2026-10-24",
+      "price": 8600
+    },
+    {
+      "productId": "846048",
+      "date": "2026-10-24",
+      "price": 9750
+    },
+    {
+      "productId": "881421",
+      "date": "2026-10-24",
+      "price": 25399
+    },
+    {
+      "productId": "881423",
+      "date": "2026-10-24",
+      "price": 17999
+    },
+    {
+      "productId": "881424",
+      "date": "2026-10-24",
+      "price": 63300
     }
   ],
   "status": {
-    "checkedAt": "2026-10-23T19:08:11.300Z",
-    "successCount": 0,
+    "checkedAt": "2026-10-23T22:06:48.522Z",
+    "successCount": 7,
     "totalCount": 7,
-    "ok": false,
-    "failures": [
-      {
-        "productId": "881424",
-        "message": "HTTP 403"
-      },
-      {
-        "productId": "881423",
-        "message": "HTTP 403"
-      },
-      {
-        "productId": "881421",
-        "message": "HTTP 403"
-      },
-      {
-        "productId": "846048",
-        "message": "HTTP 403"
-      },
-      {
-        "productId": "806644",
-        "message": "HTTP 403"
-      },
-      {
-        "productId": "762693",
-        "message": "HTTP 403"
-      },
-      {
-        "productId": "687430",
-        "message": "HTTP 403"
-      }
-    ]
+    "ok": true,
+    "failures": []
   }
 }
