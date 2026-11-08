@@ -1767,12 +1767,12 @@
     {
       "productId": "846048",
       "date": "2026-11-09",
-      "price": 8999
+      "price": 8950
     },
     {
       "productId": "881421",
       "date": "2026-11-09",
-      "price": 20990
+      "price": 20898
     },
     {
       "productId": "881423",
@@ -1782,11 +1782,11 @@
     {
       "productId": "881424",
       "date": "2026-11-09",
-      "price": 54700
+      "price": 54800
     }
   ],
   "status": {
-    "checkedAt": "2026-11-08T15:05:30.819Z",
+    "checkedAt": "2026-11-08T19:36:28.700Z",
     "successCount": 7,
     "totalCount": 7,
     "ok": true,
